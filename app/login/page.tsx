@@ -38,13 +38,7 @@ export default function LoginPage() {
 
       // ✅ Update context so Navbar reacts instantly
       if (data.user) setUser(data.user);
-
-      // ✅ Redirect based on role
-      if (data.user?.role === "admin") {
-        router.push("/admin");
-      } else {
-        router.push("/");
-      }
+        router.push("/dashboard");
     } catch (err: any) {
       setError("Something went wrong. Please try again.");
       console.error(err);
@@ -79,6 +73,8 @@ export default function LoginPage() {
           className="border w-full p-2 mb-3 rounded"
           required
         />
+        
+        
 
         <button
           type="submit"

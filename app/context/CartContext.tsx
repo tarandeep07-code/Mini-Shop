@@ -44,37 +44,53 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   // Sync cart with server whenever user logs in
   useEffect(() => {
-    async function syncCart() {
-      if (!user) {
-        setLoggedIn(false);
-        return;
-      }
+  async function syncCart() {
+    if (!user) {
+      setLoggedIn(false);
+      return;
+    }
 
-      setLoggedIn(true);
+    setLoggedIn(true);
 
-      // Fetch server cart
-      try {
-        const res = await fetch("/api/cart");
-        const serverCartData = await res.json();
-        const serverCart: CartItem[] = serverCartData.items || [];
+    try {
+      const res = await fetch("/api/cart");
+      const serverCartData = await res.json();
+      const serverCart: CartItem[] = serverCartData.items || [];
 
-        // Merge local + server cart
-        const merged = mergeCarts(cart, serverCart);
-        setCart(merged);
+      const localCart = JSON.parse(localStorage.getItem("cart") || "[]");
 
-        // Save merged cart to server
+      // 🧩 CASE 1: First-time login (no cart in DB)
+      if (serverCart.length === 0 && localCart.length > 0) {
         await fetch("/api/cart", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ items: merged }),
+          body: JSON.stringify({ items: localCart }),
         });
-      } catch (err) {
-        console.error("Cart sync failed:", err);
-      }
-    }
 
-    syncCart();
-  }, [user]);
+        setCart(localCart);
+        localStorage.removeItem("cart"); // clear local cart after sync
+      }
+
+      // 🧩 CASE 2: Returning user (DB has cart)
+      else if (serverCart.length > 0) {
+        setCart(serverCart);
+        localStorage.removeItem("cart"); // ignore local guest cart
+      }
+
+      // 🧩 CASE 3: Both empty — nothing to do
+      else {
+        setCart([]);
+      }
+
+    } catch (err) {
+      console.error("Cart sync failed:", err);
+    }
+  }
+
+  syncCart();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+}, [user]);
+
 
   // Merge helper
   const mergeCarts = (local: CartItem[], server: CartItem[]) => {

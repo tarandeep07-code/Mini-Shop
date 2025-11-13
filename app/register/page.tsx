@@ -79,7 +79,7 @@ router.push("/");
           className="border w-full p-2 mb-3 rounded"
         >
           <option value="customer">Customer</option>
-          <option value="admin">Admin</option>
+          <option value="editor">Editor</option>
         </select>
 
         <button

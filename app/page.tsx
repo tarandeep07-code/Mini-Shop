@@ -1,13 +1,32 @@
 "use client";
 
 import ProductCard from "@/components/ProductCard";
-import { products } from "@/data/products";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 
 export default function Home() {
+  const [products, setProducts] = useState<any[]>([]);
   const [selectedCategory, setSelectedCategory] = useState("All");
+  const [loading, setLoading] = useState(true);
 
+  // ✅ Fetch products from API (MongoDB)
+  useEffect(() => {
+    const fetchProducts = async () => {
+      try {
+        const res = await fetch("/api/products");
+        const data = await res.json();
+        setProducts(data);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchProducts();
+  }, []);
+
+  // Extract unique categories from fetched data
   const categories = ["All", ...Array.from(new Set(products.map((p) => p.category)))];
 
   const filteredProducts =
@@ -40,36 +59,40 @@ export default function Home() {
       </section>
 
       {/* 🏷️ Category Filter */}
-      <div className="flex flex-wrap justify-center gap-3 mb-10 px-4">
-        {categories.map((cat) => (
-          <button
-            key={cat}
-            onClick={() => setSelectedCategory(cat)}
-            className={`px-5 py-2 rounded-full border text-sm font-medium transition ${
-              selectedCategory === cat
-                ? "bg-blue-600 text-white border-blue-600 shadow-md"
-                : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
-      </div>
+      {products.length > 0 && (
+        <div className="flex flex-wrap justify-center gap-3 mb-10 px-4">
+          {categories.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setSelectedCategory(cat)}
+              className={`px-5 py-2 rounded-full border text-sm font-medium transition ${
+                selectedCategory === cat
+                  ? "bg-blue-600 text-white border-blue-600 shadow-md"
+                  : "bg-white text-gray-700 border-gray-300 hover:bg-blue-50"
+              }`}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* 🛒 Product Grid */}
       <div className="container mx-auto px-4">
-        {filteredProducts.length > 0 ? (
+        {loading ? (
+          <p className="text-center text-gray-500 text-lg">Loading products...</p>
+        ) : filteredProducts.length > 0 ? (
           <motion.div
             layout
             className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6"
           >
             {filteredProducts.map((product) => (
               <motion.div
-                key={product.id}
+                key={product._id}
                 layout
                 initial={{ opacity: 0, y: 30 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.4, delay: product.id * 0.02 }}
+                transition={{ duration: 0.4, delay: 0.02 }}
               >
                 <ProductCard product={product} />
               </motion.div>
