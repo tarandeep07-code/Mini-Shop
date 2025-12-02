@@ -3,52 +3,31 @@ import clientPromise from "@/lib/mongodb";
 
 export async function POST(req: Request) {
   try {
-    const { sessionId, billing, cart } = await req.json();
+    const { sessionId, billing, cart, amount_total } = await req.json();
+
+    if (!sessionId) return NextResponse.json({ error: "Missing sessionId" }, { status: 400 });
 
     const client = await clientPromise;
     const db = client.db("mini-shop");
-    const ordersCollection = db.collection("orders");
 
-    // 1️⃣ Ensure sessionId is unique
-    await ordersCollection.createIndex({ sessionId: 1 }, { unique: true });
+    // Prevent duplicate orders
+    let existingOrder = await db.collection("orders").findOne({ sessionId });
+    if (existingOrder) return NextResponse.json({ success: true, order: existingOrder });
 
-    // 2️⃣ Insert the order
-    const result = await ordersCollection.insertOne({
+    const result = await db.collection("orders").insertOne({
       sessionId,
-      name: billing.name,
-      email: billing.email,
-      phone: billing.phone || "",
-      address: billing.address || "",
-     // total: cart.reduce((sum, item) => sum + item.price * item.quantity, 0),
-      items: cart.map((item: any) => ({
-        productId: item.id,
-        productName: item.name,
-        price: item.price,
-        quantity: item.quantity,
-      })),
+      customer: billing,
+      items: cart,
+      amount_total,
+      payment_status: "paid",
       createdAt: new Date(),
     });
 
-    // 3️⃣ Fetch the saved document
-    const savedOrder = await ordersCollection.findOne({
-      _id: result.insertedId,
-    });
+    const savedOrder = await db.collection("orders").findOne({ _id: result.insertedId });
 
     return NextResponse.json({ success: true, order: savedOrder });
-  } catch (err: any) {
+  } catch (err) {
     console.error("Save order error:", err);
-
-    // If duplicate sessionId, return custom message
-    if (err.code === 11000) {
-      return NextResponse.json(
-        { error: "Order with this session already exists" },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      { error: "Failed to save order" },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to save order" }, { status: 500 });
   }
 }
