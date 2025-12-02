@@ -1,56 +1,36 @@
-import { NextResponse } from "next/server";
+import { NextRequest } from "next/server";
 import Stripe from "stripe";
 import clientPromise from "@/lib/mongodb";
 
-export const config = { api: { bodyParser: false } };
+// Disable body parsing for Stripe webhook
+export const runtime = "edge"; // optional if you want edge function
 
-const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, { apiVersion: "2023-08-16" as any });
-
-export async function POST(req: Request) {
-  const sig = req.headers.get("stripe-signature")!;
-  const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET!;
+export const POST = async (req: NextRequest) => {
+  const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
+    apiVersion: "2023-08-16" as any,
+  });
 
   const buf = await req.arrayBuffer();
-  const body = Buffer.from(buf);
+  const rawBody = Buffer.from(buf);
 
+  const sig = req.headers.get("stripe-signature")!;
+  
   let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(body, sig, webhookSecret);
-  } catch (err: any) {
-    console.error("Webhook signature verification failed.", err.message);
-    return NextResponse.json({ error: "Webhook Error" }, { status: 400 });
+    event = stripe.webhooks.constructEvent(
+      rawBody,
+      sig,
+      process.env.STRIPE_WEBHOOK_SECRET!
+    );
+  } catch (err) {
+    return new Response(`Webhook Error: ${err}`, { status: 400 });
   }
 
+  // handle your webhook events
   if (event.type === "checkout.session.completed") {
-    const session = event.data.object as Stripe.Checkout.Session;
-
-    const cart = session.metadata?.cart ? JSON.parse(session.metadata.cart) : [];
-    const billing = {
-      name: session.metadata?.name,
-      email: session.customer_email,
-      phone: session.metadata?.phone,
-      address: session.metadata?.address,
-    };
-
-    // Save to MongoDB
-    const client = await clientPromise;
-    const db = client.db();
-
-    // Prevent duplicate orders
-    const existing = await db.collection("orders").findOne({ sessionId: session.id });
-    if (!existing) {
-      await db.collection("orders").insertOne({
-        sessionId: session.id,
-        customer: billing,
-        cart,
-        amount_total: session.amount_total,
-        payment_status: session.payment_status,
-        createdAt: new Date(),
-      });
-      console.log("✅ Order saved:", session.id);
-    }
+    // your logic
   }
 
-  return NextResponse.json({ received: true });
-}
+  return new Response(JSON.stringify({ received: true }), { status: 200 });
+};

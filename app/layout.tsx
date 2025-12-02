@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Mini E-Commerce",
   description: "Next.js mini e-commerce site",
 };
+export const dynamic = 'force-dynamic'
 
 export default function RootLayout({
   children,
