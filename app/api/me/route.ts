@@ -3,7 +3,7 @@ import { cookies } from "next/headers";
 import jwt from "jsonwebtoken";
 
 export async function GET() {
-  try {
+  try { 
     const token = (await cookies()).get("token")?.value;
 
     if (!token) {

@@ -8,7 +8,7 @@ export async function POST(req: Request) {
     const client = await clientPromise;
     const db = client.db("mini-shop");
     const users = db.collection("users");
-
+ 
     const { name, email, password, role } = await req.json();
 
     // Check if user exists

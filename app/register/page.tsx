@@ -31,7 +31,7 @@ const router = useRouter();
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(form),
     });
-
+ 
     const data = await res.json();
     setMessage(data.error || data.message);
 

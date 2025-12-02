@@ -80,7 +80,7 @@ export default function Home() {
       {/* 🛒 Product Grid */}
       <div className="container mx-auto px-4">
         {loading ? (
-          <p className="text-center text-gray-500 text-lg">Loading products...</p>
+          <p className="text-center text-gray-500 text-lg"></p>
         ) : filteredProducts.length > 0 ? (
           <motion.div
             layout
