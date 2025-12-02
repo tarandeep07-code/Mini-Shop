@@ -8,6 +8,7 @@ interface CartItem extends Product {
   quantity: number;
 }
 
+
 interface CartContextType {
   cart: CartItem[];
   addToCart: (product: Product) => void;

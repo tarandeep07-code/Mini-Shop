@@ -148,9 +148,11 @@ export default function CartPage() {
               >
                 Clear Cart
               </button>
+              <Link href="/checkout">
               <button className="w-full bg-green-600 text-white py-2.5 rounded-lg hover:bg-green-700 transition-all">
                 Proceed to Checkout
               </button>
+              </Link>
             </div>
           </motion.div>
         </div>
