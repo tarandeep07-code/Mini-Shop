@@ -34,7 +34,7 @@ export default function ProductCard({ product }: ProductCardProps) {
         width={400}
         height={300}
         className="rounded-xl object-cover w-full h-48"
-        loading="eager"
+        loading="lazy"
         // onError={() =>
         //     setImgSrc(`https://picsum.photos/seed/${product.id}/400/300`)
         //   }

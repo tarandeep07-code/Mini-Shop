@@ -7,13 +7,16 @@ import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 export default function CheckoutPage() {
-  const { cart, clearCart } = useCart();
+  const { cart, isLoaded } = useCart();
   const router = useRouter();
 
   // Redirect to cart if empty
-  useEffect(() => {
-    if (cart.length === 0) router.push("/cart");
-  }, [cart, router]);
+    useEffect(() => {
+    if (!isLoaded) return;          // wait for hydration
+    if (cart.length === 0) {
+      router.replace("/cart");
+    }
+  }, [isLoaded, cart, router]);
 
   // Billing state
   const [billing, setBilling] = useState({

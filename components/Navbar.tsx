@@ -34,6 +34,7 @@ export default function Navbar() {
           {user ? (
             <div className="flex  gap-2 text-gray-700 gap-[10px]">
               <div className="grid text-end">
+                <Link href="/dashboard" >
               <span className="flex gap-[10px] items-center  ">
                 <User className="w-5 h-5 mt-[15px]" />
                 Hi, {user.name.split(" ")[0]}
@@ -41,6 +42,7 @@ export default function Navbar() {
               <span className="text-xs text-gray-500 capitalize">
                 {user.role}
               </span>
+              </Link>
               </div>
               <button
                 onClick={logout}

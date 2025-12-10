@@ -18,6 +18,7 @@ interface CartContextType {
   decreaseQuantity: (id: number) => void;
   logout: () => void;
   loggedIn: boolean;
+   isLoaded: boolean; 
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -25,6 +26,7 @@ const CartContext = createContext<CartContextType | undefined>(undefined);
 export function CartProvider({ children }: { children: ReactNode }) {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
 
   const { user } = useAuth(); // Get logged in user from AuthContext
 
@@ -91,6 +93,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
   syncCart();
   // eslint-disable-next-line react-hooks/exhaustive-deps
 }, [user]);
+
+useEffect(() => {
+  if (typeof window !== "undefined") {
+    const storedCart = localStorage.getItem("cart");
+    if (storedCart) setCart(JSON.parse(storedCart));
+    setIsLoaded(true); // cart is ready
+  }
+}, []);
 
 
   // Merge helper
@@ -179,6 +189,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         decreaseQuantity,
         logout,
         loggedIn,
+         isLoaded, 
       }}
     >
       {children}
