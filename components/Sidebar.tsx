@@ -2,14 +2,20 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useAuth } from "@/app/auth/AuthContext";
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { user } = useAuth();
 
   const menu = [
     { name: "Account Details", path: "/dashboard" },
     { name: "Orders", path: "/dashboard/orders" },
-    { name: "Add Product", path: "/dashboard/add-product" },
+
+    // Hide this item if user role = customer
+    ...(user?.role !== "customer"
+      ? [{ name: "Add Product", path: "/dashboard/add-product" }]
+      : []),
   ];
 
   return (

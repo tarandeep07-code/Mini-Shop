@@ -10,7 +10,7 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Missing session_id" }, { status: 400 });
     }
 
-    const client = await clientPromise;
+    const client = await clientPromise; 
     const db = client.db();
 
     const order = await db.collection("orders").findOne({ sessionId });

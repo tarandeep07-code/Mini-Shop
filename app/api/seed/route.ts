@@ -1,7 +1,7 @@
 // app/api/seed/route.ts
 import { NextResponse } from "next/server";
 import clientPromise from "@/lib/mongodb";
-import { products } from "@/data/products"; // your existing array
+//import { products } from "@/data/products"; // your existing array
 
 export async function GET() {
   try {
@@ -13,7 +13,7 @@ export async function GET() {
       return NextResponse.json({ message: "Products already seeded" });
     }
 
-    await db.collection("products").insertMany(products);
+    //await db.collection("products").insertMany(products);
     return NextResponse.json({ message: "Products added successfully" });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
